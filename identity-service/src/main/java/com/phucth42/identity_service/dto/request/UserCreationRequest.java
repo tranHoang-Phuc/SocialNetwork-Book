@@ -19,5 +19,6 @@ public class UserCreationRequest {
     String firstName;
     String lastName;
     @DobConstraint(min = 20)
-    LocalDate dateOfBirth;
+    LocalDate dob;
+    String city;
 }

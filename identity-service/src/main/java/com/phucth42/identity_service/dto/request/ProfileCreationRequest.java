@@ -1,14 +1,16 @@
-package fpt.phucth42.profile_service.dto.request;
+package com.phucth42.identity_service.dto.request;
 
+import com.phucth42.identity_service.validator.DobConstraint;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProfileCreationRequest {
     String userId;

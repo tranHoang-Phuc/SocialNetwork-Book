@@ -1,5 +1,6 @@
 package com.phucth42.identity_service.mapper;
 
+import com.phucth42.identity_service.dto.request.ProfileCreationRequest;
 import com.phucth42.identity_service.dto.request.UserCreationRequest;
 import com.phucth42.identity_service.dto.request.UserUpdateRequest;
 import com.phucth42.identity_service.dto.response.UserResponse;

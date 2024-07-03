@@ -1,4 +1,4 @@
-package fpt.phucth42.profile_service.dto.request;
+package com.phucth42.identity_service.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -10,8 +10,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProfileCreationRequest {
-    String userId;
+public class UserProfileResponse {
+    String id;
     String firstName;
     String lastName;
     LocalDate dob;

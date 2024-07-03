@@ -35,4 +35,23 @@ public class UserProfileController {
                 .result(response)
                 .build();
     }
+
+    @PutMapping("/{id}")
+    ApiResponse<UserProfileResponse> updateUserProfile(@RequestBody ProfileCreationRequest request, @PathVariable String id) {
+        UserProfileResponse response = userProfileService.updateUserProfile(request, id);
+        return ApiResponse.<UserProfileResponse>builder()
+                .code(1000)
+                .message("User profile updated successfully")
+                .result(response)
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    ApiResponse<String> deleteUserProfile(@PathVariable String id) {
+        userProfileService.deleteUserProfile(id);
+        return ApiResponse.<String>builder()
+                .code(1000)
+                .message("User profile deleted successfully")
+                .build();
+    }
 }

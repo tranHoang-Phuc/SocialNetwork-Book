@@ -33,4 +33,17 @@ public class UserProfileService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return userProfileMapper.toUserProfileResponse(userProfile);
     }
+
+    public UserProfileResponse updateUserProfile(ProfileCreationRequest request, String id) {
+        UserProfile userProfile = userProfileRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        userProfile = userProfileMapper.toUserProfile(request, userProfile);
+        userProfile = userProfileRepository.save(userProfile);
+        return userProfileMapper.toUserProfileResponse(userProfile);
+    }
+
+    public void deleteUserProfile(String id) {
+        userProfileRepository.deleteById(id);
+    }
 }

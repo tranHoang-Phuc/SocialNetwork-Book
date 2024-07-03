@@ -20,9 +20,6 @@ public class User {
     String id;
     String username;
     String password;
-    String firstName;
-    String lastName;
-    LocalDate dateOfBirth;
     @ManyToMany
     Set<Role> roles;
 }
