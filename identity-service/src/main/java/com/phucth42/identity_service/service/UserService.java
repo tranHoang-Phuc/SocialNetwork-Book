@@ -33,7 +33,6 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class UserService {
-
     IUserRepository userRepository;
     IUserMapper userMapper;
     PasswordEncoder passwordEncoder;
@@ -54,8 +53,6 @@ public class UserService {
         var profileRequest = profileMapper.toProfileCreationRequest(request);
         profileRequest.setUserId(user.getId());
         profileClient.createProfile(profileRequest);
-
-
         UserResponse userResponse = userMapper.toUserResponse(userRepository.findByUsername(request.getUsername()));
         ApiResponse<UserResponse> response = ApiResponse.<UserResponse>builder()
                 .code(1000)
@@ -66,7 +63,6 @@ public class UserService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<List<UserResponse>> getUsers() {
-        log.info("Get all users");
         ApiResponse<List<UserResponse>> response = ApiResponse.<List<UserResponse>>builder()
                 .code(1000)
                 .result(userMapper.toUsersResponse(userRepository.findAll()))
