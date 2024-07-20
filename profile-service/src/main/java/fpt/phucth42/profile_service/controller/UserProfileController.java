@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -36,6 +38,16 @@ public class UserProfileController {
                 .build();
     }
 
+    @GetMapping("/info/{id}")
+    ApiResponse<UserProfileResponse> getUserProfileInfo(@PathVariable String id) {
+        UserProfileResponse response = userProfileService.getUserByUserId(id);
+        return ApiResponse.<UserProfileResponse>builder()
+                .code(1000)
+                .message("User profile info retrieved successfully")
+                .result(response)
+                .build();
+    }
+
     @PutMapping("/{id}")
     ApiResponse<UserProfileResponse> updateUserProfile(@RequestBody ProfileCreationRequest request, @PathVariable String id) {
         UserProfileResponse response = userProfileService.updateUserProfile(request, id);
@@ -43,6 +55,15 @@ public class UserProfileController {
                 .code(1000)
                 .message("User profile updated successfully")
                 .result(response)
+                .build();
+    }
+    @GetMapping
+    ApiResponse<List<UserProfileResponse>> getAllProfiles() {
+
+        return ApiResponse.<List<UserProfileResponse>>builder()
+                .code(1000)
+                .message("User profile retrieved successfully")
+                .result(userProfileService.getAllProfiles())
                 .build();
     }
 

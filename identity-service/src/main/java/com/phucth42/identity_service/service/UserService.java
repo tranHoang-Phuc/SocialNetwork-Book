@@ -41,9 +41,8 @@ public class UserService {
     ProfileMapper profileMapper;
 
     public ApiResponse<UserResponse> createUser(UserCreationRequest request) {
-        User checkedUser = userRepository.findByUsername(request.getUsername());
-        if (checkedUser != null)
-            throw new AppException(ErrorCode.USER_EXISTED);
+        User checkedUser = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
         User user = userMapper.toDomainModel(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         Set<Role> roles = new HashSet<>();
@@ -53,7 +52,10 @@ public class UserService {
         var profileRequest = profileMapper.toProfileCreationRequest(request);
         profileRequest.setUserId(user.getId());
         profileClient.createProfile(profileRequest);
-        UserResponse userResponse = userMapper.toUserResponse(userRepository.findByUsername(request.getUsername()));
+        UserResponse userResponse = userMapper
+                .toUserResponse(userRepository
+                        .findByUsername(request.getUsername())
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
         ApiResponse<UserResponse> response = ApiResponse.<UserResponse>builder()
                 .code(1000)
                 .result(userResponse)
@@ -62,19 +64,15 @@ public class UserService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<List<UserResponse>> getUsers() {
-        ApiResponse<List<UserResponse>> response = ApiResponse.<List<UserResponse>>builder()
-                .code(1000)
-                .result(userMapper.toUsersResponse(userRepository.findAll()))
-                .build();
-        return response;
+    public List<UserResponse> getUsers() {
+        return userMapper.toUsersResponse(userRepository.findAll());
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<UserResponse> updateUser(String username, UserUpdateRequest request) {
-        User user = userRepository.findByUsername(username);
-        User checkedUser = userRepository.findByUsername(username);
-        if (checkedUser == null)
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        User checkedUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userMapper.updateUser(user, request);
         var roles = roleRepository.findAllById(request.getRoles());
@@ -88,18 +86,20 @@ public class UserService {
                 .build();
         return response;
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<String> deleteUser(String username) {
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         userRepository.delete(user);
         return ApiResponse.<String>builder()
                 .code(1000)
                 .message("Delete successfully")
                 .build();
     }
-    @PostAuthorize("returnObject.result.username == authentication.principal.username")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<UserResponse> getUser(String username) {
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         if (user == null)
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         return ApiResponse.<UserResponse>builder()

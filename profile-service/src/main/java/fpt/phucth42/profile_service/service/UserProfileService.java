@@ -13,6 +13,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -45,5 +47,24 @@ public class UserProfileService {
 
     public void deleteUserProfile(String id) {
         userProfileRepository.deleteById(id);
+    }
+
+    public UserProfileResponse getUserByUserId(String id) {
+        UserProfile userProfile = userProfileRepository.findByUserId(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        return userProfileMapper.toUserProfileResponse(userProfile);
+    }
+
+    public UserProfileResponse getProfile(String id) {
+        UserProfile userProfile =
+                userProfileRepository.findById(id).orElseThrow(() -> new RuntimeException("Profile not found"));
+
+        return userProfileMapper.toUserProfileResponse(userProfile);
+    }
+
+    public List<UserProfileResponse> getAllProfiles() {
+        var profiles = userProfileRepository.findAll();
+
+        return profiles.stream().map(userProfileMapper::toUserProfileResponse).toList();
     }
 }

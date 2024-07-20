@@ -1,6 +1,7 @@
 package com.phucth42.identity_service.configuration;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jwt.SignedJWT;
 import com.phucth42.identity_service.dto.request.IntrospectRequest;
 import com.phucth42.identity_service.service.AuthenticationService;
 import lombok.NoArgsConstructor;
@@ -30,28 +31,19 @@ public class CustomJwtDecoder implements JwtDecoder {
 
     private NimbusJwtDecoder nimbusJwtDecoder = null;
 
+    public CustomJwtDecoder(AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
+    }
     @Override
-    public Jwt decode(String token) throws JwtException {
+    public Jwt decode(String token) {
         try {
-            var response = authenticationService
-                    .introspect(IntrospectRequest.builder()
-                    .token(token)
-                    .build());
-            if (!response.isValid()) {
-                throw new JwtException("Invalid token");
-            }
-        } catch (JOSEException | ParseException e) {
-            throw new JwtException(e.getMessage());
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            return new Jwt(token, signedJWT.getJWTClaimsSet().getIssueTime().toInstant(),
+                                  signedJWT.getJWTClaimsSet().getExpirationTime().toInstant(),
+                                  signedJWT.getHeader().toJSONObject(),
+                                  signedJWT.getJWTClaimsSet().getClaims());
+        } catch (ParseException e) {
+            throw new JwtException("Invalid JWT token", e);
         }
-
-        if (Objects.isNull(nimbusJwtDecoder)) {
-            SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
-            nimbusJwtDecoder = NimbusJwtDecoder
-                    .withSecretKey(secretKeySpec)
-                    .macAlgorithm(MacAlgorithm.HS512)
-                    .build();
-        }
-
-        return nimbusJwtDecoder.decode(token);
     }
 }

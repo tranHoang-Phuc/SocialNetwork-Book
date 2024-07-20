@@ -24,13 +24,17 @@ import java.util.List;
 public class UserController {
     UserService userService;
 
-    @PostMapping
+    @PostMapping("/registration")
     public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
         return userService.createUser(request);
     }
     @GetMapping
     public ApiResponse<List<UserResponse>> getUsers() {
-        return userService.getUsers();
+        return ApiResponse.<List<UserResponse>>builder()
+                .code(1000)
+                .result(userService.getUsers())
+                .message("Get all users successfully")
+                .build();
     }
 
     @PutMapping("/{username}")

@@ -21,7 +21,7 @@ public class RoleController {
     RoleService roleService;
 
     @PostMapping
-    ApiResponse<RoleResponse> createPermission(@RequestBody RoleRequest request) {
+    ApiResponse<RoleResponse> create(@RequestBody RoleRequest request) {
         return ApiResponse.<RoleResponse>builder()
                 .code(1000)
                 .result(roleService.createRole(request))
@@ -29,7 +29,7 @@ public class RoleController {
     }
 
     @GetMapping
-    ApiResponse<List<RoleResponse>> getPermissions() {
+    ApiResponse<List<RoleResponse>> getAll() {
         return ApiResponse.<List<RoleResponse>>builder()
                 .code(1000)
                 .result(roleService.getRoles())
@@ -37,7 +37,7 @@ public class RoleController {
     }
 
     @DeleteMapping("/{name}")
-    ApiResponse<String> deletePermission(@PathVariable String name) {
+    ApiResponse<String> delete(@PathVariable String name) {
         roleService.deleteRole(name);
         return ApiResponse.<String>builder()
                 .code(1000)
