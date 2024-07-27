@@ -3,6 +3,7 @@ package fpt.phucth42.profile_service.exception;
 import fpt.phucth42.profile_service.dto.response.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,7 +31,15 @@ public class GlobalExceptionHandler {
                 .build();
         return ResponseEntity.badRequest().body(response);
     }
-
+    @ExceptionHandler(value = AuthorizationDeniedException.class)
+    ResponseEntity<ApiResponse> handlingAccessDeniedException(AuthorizationDeniedException exception) {
+        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build());
+    }
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse> handleValidation(MethodArgumentNotValidException e) {
         String enumKey = e.getFieldError().getDefaultMessage();
@@ -38,13 +47,10 @@ public class GlobalExceptionHandler {
         Map<String, Object> attributes = null;
         try {
             errorCode = ErrorCode.valueOf(enumKey);
-
             var constraint = e.getBindingResult().getAllErrors()
                     .getFirst().unwrap(ConstraintViolation.class);
             attributes = constraint.getConstraintDescriptor().getAttributes();
-
         } catch (IllegalArgumentException exception) {
-
         }
         ApiResponse response = ApiResponse.builder()
                 .code(errorCode.getCode())

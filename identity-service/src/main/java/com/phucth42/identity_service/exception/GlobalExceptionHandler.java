@@ -20,6 +20,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = AppException.class)
     public ResponseEntity<ApiResponse> handleRuntimeException(AppException e) {
+        log.error("Exception {}", e);
         ErrorCode errorCode = e.getErrorCode();
         ApiResponse response = ApiResponse.builder()
                 .code(errorCode.getCode())
@@ -39,6 +40,7 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(value = AuthorizationDeniedException.class)
     ResponseEntity<ApiResponse> handlingAccessDeniedException(AuthorizationDeniedException exception) {
+        log.error("Exception {}", exception);
         ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
         return ResponseEntity.status(errorCode.getStatusCode())
                 .body(ApiResponse.builder()
@@ -48,6 +50,7 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse> handleValidation(MethodArgumentNotValidException e) {
+        log.error("Exception {}", e);
         String enumKey = e.getFieldError().getDefaultMessage();
         ErrorCode errorCode = ErrorCode.INVALID_KEY;
         Map<String, Object> attributes = null;

@@ -23,6 +23,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.HashSet;
 import java.util.List;
@@ -41,8 +43,11 @@ public class UserService {
     ProfileMapper profileMapper;
 
     public ApiResponse<UserResponse> createUser(UserCreationRequest request) {
-        User checkedUser = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
+        User checkedUser = userRepository.findByUsername(request.getUsername()).orElse(null);
+
+        if (checkedUser != null) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
         User user = userMapper.toDomainModel(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         Set<Role> roles = new HashSet<>();

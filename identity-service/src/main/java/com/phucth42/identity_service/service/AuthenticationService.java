@@ -5,10 +5,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.phucth42.identity_service.dto.request.AuthenticationRequest;
-import com.phucth42.identity_service.dto.request.IntrospectRequest;
-import com.phucth42.identity_service.dto.request.LogOutRequest;
-import com.phucth42.identity_service.dto.request.RefreshRequest;
+import com.phucth42.identity_service.dto.request.*;
 import com.phucth42.identity_service.dto.response.AuthenticationResponse;
 import com.phucth42.identity_service.dto.response.IntrospectResponse;
 import com.phucth42.identity_service.entity.InvalidatedToken;
@@ -17,7 +14,9 @@ import com.phucth42.identity_service.exception.AppException;
 import com.phucth42.identity_service.exception.ErrorCode;
 import com.phucth42.identity_service.repository.IInvalidatedTokenRepository;
 import com.phucth42.identity_service.repository.IUserRepository;
+import com.phucth42.identity_service.repository.httpclient.OutboundIdentityClient;
 import lombok.AccessLevel;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
@@ -43,6 +42,7 @@ public class AuthenticationService {
     private static final Logger log = LoggerFactory.getLogger(AuthenticationService.class);
     IUserRepository userRepository;
     IInvalidatedTokenRepository invalidatedTokenRepository;
+    OutboundIdentityClient outboundIdentityClient;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -54,6 +54,37 @@ public class AuthenticationService {
     @NonFinal
     @Value("${jwt.valid-duration}")
     protected long VALID_DURATION;
+
+    @NonFinal
+    @Value("${oauth.client.id}")
+    protected String CLIENT_ID;
+
+    @NonFinal
+    @Value("${oauth.client.secret}")
+    protected String CLIENT_SECRET;
+
+    @NonFinal
+    @Value("${oauth.uri.redirect}")
+    protected String REDIRECT_URI;
+
+    @NonFinal
+    @Value("${oauth.grant.type}")
+    protected String GRANT_TYPE;
+    public AuthenticationResponse outboundAuthenticate(String code) {
+        var response = outboundIdentityClient
+                .exchangeToken(ExchangeTokenRequest.builder()
+                        .clientId(CLIENT_ID)
+                        .clientSecret(CLIENT_SECRET)
+                        .redirectUri(REDIRECT_URI)
+                        .code(code)
+                        .grantType(GRANT_TYPE)
+                        .build());
+        log.info("Token response: {}", response);
+        return AuthenticationResponse.builder()
+                .token(response.getAccessToken())
+                .build();
+    }
+
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
